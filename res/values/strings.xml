@@ -12,10 +12,11 @@
     <string name="label_text">Send Text</string>
     <string name="label_scan">Scan</string>
     <string name="label_stop">Stop</string>
-    <string name="hint_number">Phone Number</string>
+    <string name="hint_contact_name">Contact Name</string>
     <string name="text_sos_msg">SOS!  Need Help!</string>
-    <string name="text_howto">Enter a phone number in the above line.  Then, connect to a MetaWear board and send text messages by pressing the button</string>
+    <string name="text_howto">Enter a name and select a contact from the list of matching names.  Then, connect to a MetaWear board and send text messages by pressing the button on the board</string>
     
+    <string name="error_no_contact">No contact selected</string>
     <string name="error_no_bluetooth">Bluetooth not supported</string>
     <string name="error_invalid_number">Phone number invalid, write all 10 digits as one string</string>
 </resources>
