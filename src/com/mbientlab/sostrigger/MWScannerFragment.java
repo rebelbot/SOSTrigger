@@ -2,6 +2,7 @@ package com.mbientlab.sostrigger;
 
 import java.util.Locale;
 
+import android.app.Activity;
 import android.app.DialogFragment;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -10,15 +11,24 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MWScannerFragment extends DialogFragment {
+    public interface ScannerCallback {
+        public void btDeviceSelected(BluetoothDevice device);
+    }
+    
     private BluetoothAdapter mBluetoothAdapter= null;
     private BLEDeviceListAdapter mLeDeviceListAdapter= null;
+    private boolean isScanning;
     
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
@@ -86,16 +96,50 @@ public class MWScannerFragment extends DialogFragment {
 
     }
     
+    private Button scanControl;
+    private ScannerCallback callback;
+    
+    @Override
+    public void onAttach(Activity activity) {
+        if (!(activity instanceof ScannerCallback)) {
+            throw new RuntimeException("Acitivty does not implement ScannerCallback interface");
+        }
+        
+        callback= (ScannerCallback) activity;
+        super.onAttach(activity);
+    }
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mLeDeviceListAdapter= new BLEDeviceListAdapter(getActivity(), R.id.mw_ble_info_layout, inflater);
         return inflater.inflate(R.layout.metawear_device_selection, container);
     }
     
+    
+    
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        ListView devices= (ListView) view.findViewById(R.id.listView1);
-        devices.setAdapter(mLeDeviceListAdapter);
+        ((ListView) view.findViewById(R.id.listView1)).setAdapter(mLeDeviceListAdapter);
+        ((ListView) view.findViewById(R.id.listView1)).setOnItemClickListener(new OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view,
+                    int position, long id) {
+                callback.btDeviceSelected(mLeDeviceListAdapter.getItem(position).device);
+                dismiss();
+            }
+        });
+        
+        scanControl= (Button) view.findViewById(R.id.scan_control);
+        scanControl.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isScanning) {
+                    stopBleScan();
+                } else {
+                    startBleScan();
+                }
+            }
+        });
+        
         final BluetoothManager bluetoothManager=
                 (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter= bluetoothManager.getAdapter();
@@ -104,13 +148,27 @@ public class MWScannerFragment extends DialogFragment {
             Toast.makeText(getActivity(), R.string.error_no_bluetooth, Toast.LENGTH_SHORT).show();
             return;
         }
-        
-        mBluetoothAdapter.startLeScan(mLeScanCallback);
+        startBleScan();
     }
     
     @Override
     public void onDestroyView() {
-        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        stopBleScan();
         super.onDestroyView();
+    }
+    
+    private void startBleScan() {
+        mLeDeviceListAdapter.clear();
+        isScanning= true;
+        scanControl.setText(R.string.label_stop);
+        
+        mBluetoothAdapter.startLeScan(mLeScanCallback);
+    }
+    
+    private void stopBleScan() {
+        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        
+        isScanning= false;
+        scanControl.setText(R.string.label_scan);
     }
 }

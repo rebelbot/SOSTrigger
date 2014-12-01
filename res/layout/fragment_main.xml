@@ -9,7 +9,7 @@
     tools:context="com.mbientlab.sostrigger.MainActivity$PlaceholderFragment" >
 
     <Button
-        android:id="@+id/button1"
+        android:id="@+id/scan_control"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/editText1"

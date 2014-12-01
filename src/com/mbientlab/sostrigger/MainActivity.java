@@ -2,9 +2,11 @@ package com.mbientlab.sostrigger;
 
 import java.util.Locale;
 
+import com.mbientlab.sostrigger.MWScannerFragment.ScannerCallback;
+
 import android.app.Activity;
 import android.app.Fragment;
-import android.app.FragmentManager;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -18,7 +20,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements ScannerCallback {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,7 +76,7 @@ public class MainActivity extends Activity {
         public void onViewCreated(View view, Bundle savedInstanceState) {
             final EditText phoneNum= (EditText) view.findViewById(R.id.editText1);
             
-            ((Button) view.findViewById(R.id.button1)).setOnClickListener(new OnClickListener() {
+            ((Button) view.findViewById(R.id.scan_control)).setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
                     Intent callIntent = new Intent(Intent.ACTION_CALL, 
@@ -99,6 +101,11 @@ public class MainActivity extends Activity {
             });
         }
 
+    }
+
+    @Override
+    public void btDeviceSelected(BluetoothDevice device) {
+        
     }
 
 }
