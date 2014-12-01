@@ -9,6 +9,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -26,9 +27,12 @@ public class MWScannerFragment extends DialogFragment {
         public void btDeviceSelected(BluetoothDevice device);
     }
     
+    private final static long SCAN_PERIOD= 10000;
+    
     private BluetoothAdapter mBluetoothAdapter= null;
     private BLEDeviceListAdapter mLeDeviceListAdapter= null;
     private boolean isScanning;
+    private Handler mHandler;
     
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
@@ -111,6 +115,7 @@ public class MWScannerFragment extends DialogFragment {
     @Override
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mLeDeviceListAdapter= new BLEDeviceListAdapter(getActivity(), R.id.mw_ble_info_layout, inflater);
+        mHandler= new Handler();
         return inflater.inflate(R.layout.metawear_device_selection, container);
     }    
     
@@ -156,17 +161,27 @@ public class MWScannerFragment extends DialogFragment {
     }
     
     private void startBleScan() {
-        mLeDeviceListAdapter.clear();
-        isScanning= true;
-        scanControl.setText(R.string.label_stop);
+        if (!isScanning) {
+            mLeDeviceListAdapter.clear();
+            isScanning= true;
+            scanControl.setText(R.string.label_stop);
         
-        mBluetoothAdapter.startLeScan(mLeScanCallback);
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    stopBleScan();
+                }
+            }, SCAN_PERIOD);
+            mBluetoothAdapter.startLeScan(mLeScanCallback);            
+        }
     }
     
     private void stopBleScan() {
-        mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        if (isScanning) {
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
         
-        isScanning= false;
-        scanControl.setText(R.string.label_scan);
+            isScanning= false;
+            scanControl.setText(R.string.label_scan);
+        }
     }
 }
