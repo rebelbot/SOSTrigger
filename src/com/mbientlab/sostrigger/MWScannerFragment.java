@@ -112,9 +112,7 @@ public class MWScannerFragment extends DialogFragment {
     public View onCreateView (LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         mLeDeviceListAdapter= new BLEDeviceListAdapter(getActivity(), R.id.mw_ble_info_layout, inflater);
         return inflater.inflate(R.layout.metawear_device_selection, container);
-    }
-    
-    
+    }    
     
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
