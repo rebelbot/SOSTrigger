@@ -25,7 +25,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 public class MainActivity extends Activity implements ScannerCallback {
-    private PlaceholderFragment mainFragment;
+    private final static String FRAGMENT_KEY= "com.mbientlab.sostrigger.MainActivity.FRAGMENT_KEY";
+    private PlaceholderFragment mainFragment= null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +36,8 @@ public class MainActivity extends Activity implements ScannerCallback {
         if (savedInstanceState == null) {
             mainFragment= new PlaceholderFragment();
             getFragmentManager().beginTransaction().add(R.id.container, mainFragment).commit();
+        } else {
+            mainFragment= (PlaceholderFragment) getFragmentManager().getFragment(savedInstanceState, FRAGMENT_KEY);
         }
     }
 
@@ -80,6 +83,15 @@ public class MainActivity extends Activity implements ScannerCallback {
         super.onPause();
         unregisterReceiver(MetaWearBleService.getMetaWearBroadcastReceiver());
     }
+    
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        
+        if (mainFragment != null) {
+            getFragmentManager().putFragment(outState, FRAGMENT_KEY, mainFragment);
+        }
+    }
 
     /**
      * A placeholder fragment containing a simple view.
@@ -115,9 +127,18 @@ public class MainActivity extends Activity implements ScannerCallback {
                     this, Context.BIND_AUTO_CREATE);
         }
         
+        
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            
+            getActivity().getApplicationContext().unbindService(this);
+        }
+        
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
+            setRetainInstance(true);
             setHasOptionsMenu(true);
             return inflater.inflate(R.layout.fragment_main, container, false);
         }
@@ -170,6 +191,5 @@ public class MainActivity extends Activity implements ScannerCallback {
                 Toast.makeText(getActivity(), R.string.error_invalid_number, Toast.LENGTH_SHORT).show();
             }
         }
-        
     }
 }
