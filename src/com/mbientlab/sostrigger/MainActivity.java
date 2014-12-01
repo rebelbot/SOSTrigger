@@ -1,7 +1,5 @@
 package com.mbientlab.sostrigger;
 
-import java.util.Locale;
-
 import com.mbientlab.metawear.api.MetaWearBleService;
 import com.mbientlab.metawear.api.MetaWearController;
 import com.mbientlab.metawear.api.Module;
@@ -15,7 +13,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.telephony.SmsManager;
@@ -23,9 +20,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -130,22 +125,6 @@ public class MainActivity extends Activity implements ScannerCallback {
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
             phoneNumText= (EditText) view.findViewById(R.id.editText1);
-            
-            ((Button) view.findViewById(R.id.scan_control)).setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent callIntent = new Intent(Intent.ACTION_CALL, 
-                            Uri.parse(String.format(Locale.US, "tel:%s", phoneNumText.getEditableText().toString())));
-                    startActivity(callIntent);
-                }
-            });
-            
-            ((Button) view.findViewById(R.id.button2)).setOnClickListener(new OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    sendText(phoneNumText.getEditableText().toString());
-                }
-            });
         }
         
         @Override
@@ -182,8 +161,14 @@ public class MainActivity extends Activity implements ScannerCallback {
             it.putExtra(Intent.EXTRA_TEXT, "Halp! SOS!"); 
             startActivity(it);
              */
-            SmsManager sm= SmsManager.getDefault();
-            sm.sendTextMessage(phoneNum, null, "SOS!", null, null);
+            
+            try {
+                SmsManager.getDefault().sendTextMessage(phoneNum, null, 
+                        getActivity().getResources().getString(R.string.text_sos_msg)
+                        , null, null);
+            } catch (IllegalArgumentException ex) {
+                Toast.makeText(getActivity(), R.string.error_invalid_number, Toast.LENGTH_SHORT).show();
+            }
         }
         
     }
