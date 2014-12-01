@@ -103,7 +103,11 @@ public class MainActivity extends Activity implements ScannerCallback {
                 public void connected() {
                     ((MechanicalSwitch) mwController.getModuleController(Module.MECHANICAL_SWITCH)).enableNotification();
                     Toast.makeText(getActivity(), R.string.toast_connected, Toast.LENGTH_SHORT).show();
-                    mwController.removeDeviceCallback(this);
+                }
+                
+                @Override
+                public void disconnected() {
+                    Toast.makeText(getActivity(), R.string.toast_disconnected, Toast.LENGTH_SHORT).show();
                 }
             });
             mwService.connect(device);
@@ -149,7 +153,7 @@ public class MainActivity extends Activity implements ScannerCallback {
             switch (item.getItemId()) {
             case R.id.action_disconnect:
                 if (mwService != null) {
-                    mwService.close();
+                    mwService.close(true);
                 }
                 return true;
             }

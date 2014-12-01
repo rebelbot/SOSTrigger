@@ -5,7 +5,8 @@
     <string name="action_settings">Settings</string>
     <string name="action_connect">Connect</string>
     <string name="action_disconnect">Disonnect</string>
-    <string name="toast_connected">Connected</string>
+    <string name="toast_connected">Device Connected</string>
+    <string name="toast_disconnected">Device Disconnected</string>
 
     <string name="label_call">Call</string>
     <string name="label_text">Send Text</string>
