@@ -45,10 +45,12 @@ import android.widget.AdapterView.OnItemClickListener;
  * Main activity that controls the app
  * @author Eric Tsai
  */
-public class MainActivity extends Activity implements ScannerCallback {
+public class MainActivity extends Activity implements ScannerCallback, ServiceConnection {
     private final static String FRAGMENT_KEY= "com.mbientlab.sostrigger.MainActivity.FRAGMENT_KEY";
     private final static int REQUEST_ENABLE_BT= 0;
+    
     private PlaceholderFragment mainFragment= null;
+    private MetaWearBleService mwService= null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +64,9 @@ public class MainActivity extends Activity implements ScannerCallback {
             mainFragment= (PlaceholderFragment) getFragmentManager().getFragment(savedInstanceState, FRAGMENT_KEY);
         }
         
-        BluetoothManager bluetoothManager= (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
-        if (bluetoothManager == null) {
+        BluetoothAdapter btAdapter= ((BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
+        
+        if (btAdapter == null) {
             new AlertDialog.Builder(this).setTitle(R.string.error_title)
                     .setMessage(R.string.error_no_bluetooth)
                     .setCancelable(false)
@@ -74,10 +77,23 @@ public class MainActivity extends Activity implements ScannerCallback {
                     })
                     .create()
                     .show();
-        } else if (!bluetoothManager.getAdapter().isEnabled()) {
+        } else if (!btAdapter.isEnabled()) {
             final Intent enableIntent= new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
         }
+        
+        getApplicationContext().bindService(new Intent(this, MetaWearBleService.class), 
+                this, Context.BIND_AUTO_CREATE);
+    }
+    
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        
+        if (mwService != null) {
+            mwService.unregisterReceiver(MetaWearBleService.getMetaWearBroadcastReceiver());
+        }
+        getApplicationContext().unbindService(this);
     }
     
     @Override
@@ -120,19 +136,6 @@ public class MainActivity extends Activity implements ScannerCallback {
         mainFragment.setBtDevice(device);
     }
 
-    
-    @Override
-    protected void onResume() {
-        super.onResume();
-        registerReceiver(MetaWearBleService.getMetaWearBroadcastReceiver(), 
-                MetaWearBleService.getMetaWearIntentFilter());
-    }
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(MetaWearBleService.getMetaWearBroadcastReceiver());
-    }
-    
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -141,6 +144,16 @@ public class MainActivity extends Activity implements ScannerCallback {
             getFragmentManager().putFragment(outState, FRAGMENT_KEY, mainFragment);
         }
     }
+    
+    @Override
+    public void onServiceConnected(ComponentName componentName, IBinder service) {
+        mwService= ((MetaWearBleService.LocalBinder) service).getService();
+        mwService.registerReceiver(MetaWearBleService.getMetaWearBroadcastReceiver(), 
+                MetaWearBleService.getMetaWearIntentFilter());
+    }
+    
+    @Override
+    public void onServiceDisconnected(ComponentName name) { }
     
     private static class ContactInfo {
         public String name;
