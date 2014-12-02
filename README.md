@@ -1,4 +1,4 @@
-SOS AdTrigger
+SOS Trigger
 ==========
 
 #About  
