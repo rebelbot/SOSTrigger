@@ -1,3 +1,6 @@
+/*
+ * Copyright 2014 MbientLab Inc. All rights reserved.
+ */
 package com.mbientlab.sostrigger;
 
 import com.mbientlab.metawear.api.MetaWearBleService;
@@ -38,6 +41,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
 
+/**
+ * Main activity that controls the app
+ * @author Eric Tsai
+ */
 public class MainActivity extends Activity implements ScannerCallback {
     private final static String FRAGMENT_KEY= "com.mbientlab.sostrigger.MainActivity.FRAGMENT_KEY";
     private final static int REQUEST_ENABLE_BT= 0;

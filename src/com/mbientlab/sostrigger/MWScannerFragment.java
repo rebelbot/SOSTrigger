@@ -1,3 +1,6 @@
+/*
+ * Copyright 2014 MbientLab Inc. All rights reserved.
+ */
 package com.mbientlab.sostrigger;
 
 import java.util.Locale;
@@ -22,6 +25,10 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 
+/**
+ * Fragment that scans for and reports discovered ble devices
+ * @author Eric Tsai
+ */
 public class MWScannerFragment extends DialogFragment {
     public interface ScannerCallback {
         public void btDeviceSelected(BluetoothDevice device);

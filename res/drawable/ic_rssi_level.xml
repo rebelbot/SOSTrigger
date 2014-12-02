@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Copyright 2014 MbientLab Inc. All rights reserved.
+	Author : Eric Tsai 
+ -->
 <level-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:maxLevel="0" android:drawable="@drawable/ic_action_network_cell" />
     <item android:maxLevel="1" android:drawable="@drawable/ic_action_network_cell_1" />

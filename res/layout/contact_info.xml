@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+	Copyright 2014 MbientLab Inc. All rights reserved.
+	Author : Eric Tsai 
+ -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/contact_info_layout"
     android:layout_width="match_parent"
