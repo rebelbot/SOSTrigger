@@ -9,13 +9,13 @@
     <item
         android:id="@+id/action_connect"
         android:orderInCategory="100"
-        android:showAsAction="never"
+        android:showAsAction="always"
         android:title="@string/action_connect"/>
     
     <item
         android:id="@+id/action_disconnect"
         android:orderInCategory="100"
-        android:showAsAction="never"
+        android:showAsAction="always"
         android:title="@string/action_disconnect"/>
 
 </menu>
