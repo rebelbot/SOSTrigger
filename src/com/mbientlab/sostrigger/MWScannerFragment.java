@@ -18,6 +18,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,6 +28,7 @@ public class MWScannerFragment extends DialogFragment {
         public void btDeviceSelected(BluetoothDevice device);
     }
     
+    private final static int RSSI_BAR_SCALE= 100 / 5;
     private final static long SCAN_PERIOD= 10000;
     
     private BluetoothAdapter mBluetoothAdapter= null;
@@ -74,6 +76,7 @@ public class MWScannerFragment extends DialogFragment {
                 viewHolder.deviceAddress= (TextView) convertView.findViewById(R.id.device_address);
                 viewHolder.deviceName= (TextView) convertView.findViewById(R.id.device_name);
                 viewHolder.deviceRSSI= (TextView) convertView.findViewById(R.id.rssi);
+                viewHolder.rssiChart= (ImageView) convertView.findViewById(R.id.imageView1);
                 
                 convertView.setTag(viewHolder);
             } else {
@@ -88,7 +91,8 @@ public class MWScannerFragment extends DialogFragment {
             else
                 viewHolder.deviceName.setText("Unknown Device");
             viewHolder.deviceAddress.setText(info.device.getAddress());
-            viewHolder.deviceRSSI.setText(String.format(Locale.US, "%d", info.rssi));
+            viewHolder.deviceRSSI.setText(String.format(Locale.US, "%d dBm", info.rssi));
+            viewHolder.rssiChart.setImageLevel((127 + info.rssi + 10) / RSSI_BAR_SCALE);
             return convertView;
         }
         
@@ -96,6 +100,7 @@ public class MWScannerFragment extends DialogFragment {
             public TextView deviceAddress;
             public TextView deviceName;
             public TextView deviceRSSI;
+            public ImageView rssiChart;
         }
 
     }

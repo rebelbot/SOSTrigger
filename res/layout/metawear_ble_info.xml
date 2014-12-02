@@ -17,11 +17,26 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/device_name" />
 
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/device_address"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="14dp"
+        android:layout_toLeftOf="@+id/rssi"
+        android:contentDescription="@string/text_rssi_visual"
+        android:src="@drawable/ic_rssi_level"
+        android:maxLevel="4"
+        android:minLevel="0" />
+
     <TextView
         android:id="@+id/rssi"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/device_address"
-        android:layout_alignParentRight="true" />
+        android:layout_alignBottom="@+id/imageView1"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:gravity="center" />
 
 </RelativeLayout>
