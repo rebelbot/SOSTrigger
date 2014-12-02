@@ -54,8 +54,10 @@ public class MWScannerFragment extends DialogFragment {
                     temp.device= device;
                     temp.rssi= rssi;
                     
-                    mLeDeviceListAdapter.add(temp);
-                    mLeDeviceListAdapter.notifyDataSetChanged();
+                    if (mLeDeviceListAdapter.getPosition(temp) == -1) {
+                        mLeDeviceListAdapter.add(temp);
+                        mLeDeviceListAdapter.notifyDataSetChanged();
+                    }
                 }
             });
         }
@@ -64,6 +66,12 @@ public class MWScannerFragment extends DialogFragment {
     public class BtDeviceRssi {
         public BluetoothDevice device;
         public int rssi;
+        
+        @Override
+        public boolean equals(Object obj) {
+            return (obj == this) || 
+                    ((obj instanceof BtDeviceRssi) && device.equals(((BtDeviceRssi) obj).device));
+        }
     }
     public class BLEDeviceListAdapter extends ArrayAdapter<BtDeviceRssi> {
         private final LayoutInflater mInflator;

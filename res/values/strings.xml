@@ -3,7 +3,7 @@
 
     <string name="app_name">SOS Trigger</string>
     <string name="action_connect">Connect</string>
-    <string name="action_disconnect">Disonnect</string>
+    <string name="action_disconnect">Disconnect</string>
     <string name="toast_connected">Device Connected</string>
     <string name="toast_disconnected">Device Disconnected</string>
 
