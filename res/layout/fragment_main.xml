@@ -9,7 +9,7 @@
     tools:context="com.mbientlab.sostrigger.MainActivity$PlaceholderFragment" >
 
     <EditText
-        android:id="@+id/editText1"
+        android:id="@+id/recipient"
         android:layout_width="290dp"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
@@ -23,24 +23,24 @@
     </EditText>
 
     <ListView
-        android:id="@+id/listView1"
+        android:id="@+id/phone_contacts"
         android:layout_width="290dp"
-        android:layout_height="330dp"
-        android:layout_alignLeft="@+id/editText1"
-        android:layout_alignRight="@+id/editText1"
-        android:layout_below="@+id/editText1"
+        android:layout_height="300dp"
+        android:layout_alignLeft="@+id/recipient"
+        android:layout_alignRight="@+id/recipient"
+        android:layout_below="@+id/recipient"
         android:layout_centerHorizontal="true"
         android:visibility="gone" >
     </ListView>
     
     <ScrollView
-        android:id="@+id/ScrollView1"
+        android:id="@+id/howto_area"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/editText1"
-        android:layout_alignRight="@+id/editText1"
-        android:layout_centerHorizontal="true"
-        android:layout_below="@+id/listView1" >
+        android:layout_alignLeft="@+id/recipient"
+        android:layout_alignRight="@+id/recipient"
+        android:layout_below="@+id/phone_contacts"
+        android:layout_centerHorizontal="true" >
 
         <TextView
             android:layout_width="290dp"

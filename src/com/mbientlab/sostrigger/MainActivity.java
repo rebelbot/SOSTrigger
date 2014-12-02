@@ -100,8 +100,6 @@ public class MainActivity extends Activity implements ScannerCallback {
         // as you specify a parent activity in AndroidManifest.xml.
         
         switch(item.getItemId()) {
-        case R.id.action_settings:
-            return true;
         case R.id.action_connect:
             new MWScannerFragment().show(getFragmentManager(), "metawear_scanner_fragment");
         }        
@@ -207,6 +205,7 @@ public class MainActivity extends Activity implements ScannerCallback {
                 } else {
                     contacts.clear();
                     contacts.notifyDataSetChanged();
+                    possibleContacts.setVisibility(View.GONE);
                 }
             }
 
@@ -260,10 +259,10 @@ public class MainActivity extends Activity implements ScannerCallback {
 
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
-            phoneNumText= (EditText) view.findViewById(R.id.editText1);
+            phoneNumText= (EditText) view.findViewById(R.id.recipient);
             phoneNumText.addTextChangedListener(txtWatcher);
             
-            possibleContacts= (ListView) view.findViewById(R.id.listView1); 
+            possibleContacts= (ListView) view.findViewById(R.id.phone_contacts); 
             possibleContacts.setAdapter(contacts);
             possibleContacts.setOnItemClickListener(new OnItemClickListener() {
                 @Override

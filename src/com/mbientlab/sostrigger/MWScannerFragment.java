@@ -21,7 +21,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class MWScannerFragment extends DialogFragment {
     public interface ScannerCallback {
@@ -126,8 +125,9 @@ public class MWScannerFragment extends DialogFragment {
     
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        ((ListView) view.findViewById(R.id.listView1)).setAdapter(mLeDeviceListAdapter);
-        ((ListView) view.findViewById(R.id.listView1)).setOnItemClickListener(new OnItemClickListener() {
+        ListView scannedDevices= (ListView) view.findViewById(R.id.scanned_devices);
+        scannedDevices.setAdapter(mLeDeviceListAdapter);
+        scannedDevices.setOnItemClickListener(new OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                     int position, long id) {
