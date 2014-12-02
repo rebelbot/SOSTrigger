@@ -7,11 +7,15 @@ import com.mbientlab.metawear.api.controller.MechanicalSwitch;
 import com.mbientlab.sostrigger.MWScannerFragment.ScannerCallback;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.database.Cursor;
@@ -36,6 +40,7 @@ import android.widget.AdapterView.OnItemClickListener;
 
 public class MainActivity extends Activity implements ScannerCallback {
     private final static String FRAGMENT_KEY= "com.mbientlab.sostrigger.MainActivity.FRAGMENT_KEY";
+    private final static int REQUEST_ENABLE_BT= 0;
     private PlaceholderFragment mainFragment= null;
     
     @Override
@@ -49,6 +54,35 @@ public class MainActivity extends Activity implements ScannerCallback {
         } else {
             mainFragment= (PlaceholderFragment) getFragmentManager().getFragment(savedInstanceState, FRAGMENT_KEY);
         }
+        
+        BluetoothManager bluetoothManager= (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+        if (bluetoothManager == null) {
+            new AlertDialog.Builder(this).setTitle(R.string.error_title)
+                    .setMessage(R.string.error_no_bluetooth)
+                    .setCancelable(false)
+                    .setPositiveButton(R.string.label_ok, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int id) {
+                            MainActivity.this.finish();
+                        }
+                    })
+                    .create()
+                    .show();
+        } else if (!bluetoothManager.getAdapter().isEnabled()) {
+            final Intent enableIntent= new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableIntent, REQUEST_ENABLE_BT);
+        }
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+        case REQUEST_ENABLE_BT:
+            if (resultCode == Activity.RESULT_CANCELED) {
+                finish();
+            }
+            break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     @Override

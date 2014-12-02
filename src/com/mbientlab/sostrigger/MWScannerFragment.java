@@ -148,14 +148,8 @@ public class MWScannerFragment extends DialogFragment {
             }
         });
         
-        final BluetoothManager bluetoothManager=
-                (BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE);
-        mBluetoothAdapter= bluetoothManager.getAdapter();
-        
-        if (mBluetoothAdapter == null) {
-            Toast.makeText(getActivity(), R.string.error_no_bluetooth, Toast.LENGTH_SHORT).show();
-            return;
-        }
+        //Main activity has already checked a bluetooth manager exists
+        mBluetoothAdapter= ((BluetoothManager) getActivity().getSystemService(Context.BLUETOOTH_SERVICE)).getAdapter();
         startBleScan();
     }
     
