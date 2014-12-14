@@ -24,26 +24,11 @@
     <ListView
         android:id="@+id/phone_contacts"
         android:layout_width="290dp"
-        android:layout_height="300dp"
+        android:layout_height="wrap_content"
         android:layout_alignLeft="@+id/AutoCompleteTextView1"
         android:layout_alignRight="@+id/AutoCompleteTextView1"
         android:layout_below="@+id/AutoCompleteTextView1"
         android:layout_centerHorizontal="true" >
     </ListView>
-    
-    <ScrollView
-        android:id="@+id/howto_area"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignLeft="@+id/phone_contacts"
-        android:layout_alignRight="@+id/phone_contacts"
-        android:layout_below="@+id/phone_contacts"
-        android:layout_centerHorizontal="true" >
-
-        <TextView
-            android:layout_width="290dp"
-            android:layout_height="wrap_content"
-            android:text="@string/text_howto" />
-    </ScrollView>
 
 </RelativeLayout>

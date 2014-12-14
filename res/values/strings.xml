@@ -12,15 +12,16 @@
     <string name="label_scan">Scan</string>
     <string name="label_stop">Stop</string>
     <string name="label_ok">OK</string>
+    <string name="label_help">How To</string>
     <string name="hint_contact_name">Contact Name</string>
     <string name="text_rssi_visual">Visual interpretation of the RSSI value</string>
     <string name="text_sos_msg">SOS!  Need Help!</string>
-    <string name="text_howto">Enter the name of a contact you wish to text.  Selected names will appear in the area below the input field and can be 
+    <string name="text_help">Enter the name of a contact you wish to text.  Selected names will appear in the area below the input field and can be 
         removed by long pressing them.  Once you have your contacts selected, connect a MetaWear board to the app.  You can then send a text message 
         to your contacts by pressing the onboard button</string>
     
     <string name="error_no_contact">No contact selected</string>
     <string name="error_title">Error</string>
     <string name="error_no_bluetooth">Bluetooth device not deteted</string>
-    <string name="error_sending_text">Couldn't send text to one or more numbers</string>
+    <string name="error_sending_text">Could not send text to one or more numbers</string>
 </resources>

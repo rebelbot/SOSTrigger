@@ -124,6 +124,14 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
         switch(item.getItemId()) {
         case R.id.action_connect:
             new MWScannerFragment().show(getFragmentManager(), "metawear_scanner_fragment");
+            break;
+        case R.id.action_help:
+            new AlertDialog.Builder(this).setTitle(R.string.label_help)
+                    .setMessage(R.string.text_help)
+                    .setCancelable(true)
+                    .create()
+                    .show();
+            break;
         }        
         return super.onOptionsItemSelected(item);
     }
