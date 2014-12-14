@@ -3,8 +3,6 @@
  */
 package com.mbientlab.sostrigger;
 
-import java.util.HashSet;
-
 import com.mbientlab.metawear.api.MetaWearBleService;
 import com.mbientlab.metawear.api.MetaWearController;
 import com.mbientlab.metawear.api.Module;
@@ -18,7 +16,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -28,21 +25,16 @@ import android.os.Bundle;
 import android.os.IBinder;
 import static android.provider.ContactsContract.CommonDataKinds.Phone.*;
 import android.telephony.SmsManager;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
-import android.widget.EditText;
 import android.widget.ListView;
-import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
@@ -226,36 +218,9 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
     public static class PlaceholderFragment extends Fragment implements ServiceConnection {
         private MetaWearBleService mwService= null;
         private MetaWearController mwController= null;
-        private EditText phoneNumText= null;
-        private ContactListAdapter contacts= null, selectedContacts= null;
-        private ContactInfo saviour= null;
-        private HashSet<ContactInfo> saviours;
-        private ListView possibleContacts= null;
-        private AutoCompleteTextView auto= null;
-        
-        private TextWatcher txtWatcher= new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start,
-                    int count, int after) { }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start,
-                    int before, int count) {
-                if (possibleContacts.getVisibility() != View.VISIBLE) {
-                    possibleContacts.setVisibility(View.VISIBLE);
-                }
-                if (s.length() > 0) {
-                    populate(s.toString());
-                } else {
-                    contacts.clear();
-                    contacts.notifyDataSetChanged();
-                    possibleContacts.setVisibility(View.GONE);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) { }
-        };
+        private ContactListAdapter contacts= null, saviours= null;
+        private ListView savioursListView= null;
+        private AutoCompleteTextView contactName= null;
         
         public PlaceholderFragment() {
         }
@@ -297,60 +262,38 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             setRetainInstance(true);
             setHasOptionsMenu(true);
             
-            //contacts= new ContactListAdapter(getActivity(), R.id.contact_info_layout, inflater);
             Cursor peopleCursor= getActivity().getContentResolver().query(CONTENT_URI,new String[] {DISPLAY_NAME, NUMBER},
                     null,null,null);
             contacts= new ContactListAdapter(getActivity(),R.id.contact_info_layout, inflater, peopleCursor);
-            selectedContacts= new ContactListAdapter(getActivity(), R.id.contact_info_layout, inflater);
+            saviours= new ContactListAdapter(getActivity(), R.id.contact_info_layout, inflater);
             return inflater.inflate(R.layout.fragment_main, container, false);
         }
 
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
-            /*
-            phoneNumText= (EditText) view.findViewById(R.id.recipient);
-            phoneNumText.addTextChangedListener(txtWatcher);
-            */
-            possibleContacts= (ListView) view.findViewById(R.id.phone_contacts); 
-            possibleContacts.setAdapter(selectedContacts);
-            possibleContacts.setOnItemLongClickListener(new OnItemLongClickListener() {
-
+            savioursListView= (ListView) view.findViewById(R.id.phone_contacts); 
+            savioursListView.setAdapter(saviours);
+            savioursListView.setOnItemLongClickListener(new OnItemLongClickListener() {
                 @Override
                 public boolean onItemLongClick(AdapterView<?> parent,
                         View view, int position, long id) {
-                    selectedContacts.remove(selectedContacts.getItem(position));
-                    selectedContacts.notifyDataSetChanged();
+                    saviours.remove(saviours.getItem(position));
+                    saviours.notifyDataSetChanged();
                     return true;
                 }
-                
             });
-            /*
-            possibleContacts.setOnItemClickListener(new OnItemClickListener() {
-                @Override
-                public void onItemClick(AdapterView<?> parent, View view,
-                        int position, long id) {
-                    saviour= contacts.getItem(position);
-                    possibleContacts.setVisibility(View.GONE);
-                    
-                    phoneNumText.removeTextChangedListener(txtWatcher);
-                    phoneNumText.setText(saviour.name);
-                    phoneNumText.addTextChangedListener(txtWatcher);
-                }
-            });
-            */
             
-            auto=(AutoCompleteTextView) 
-                    view.findViewById(R.id.AutoCompleteTextView1);
-            auto.setThreshold(1);
-            auto.setAdapter(contacts);
-            auto.setOnItemClickListener(new OnItemClickListener() {
+            contactName= (AutoCompleteTextView) view.findViewById(R.id.AutoCompleteTextView1);
+            contactName.setThreshold(1);
+            contactName.setAdapter(contacts);
+            contactName.setOnItemClickListener(new OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view,
                         int position, long id) {
-                    if (selectedContacts.getPosition(contacts.getItem(position)) == -1) {
-                        selectedContacts.add(contacts.getItem(position));
-                        selectedContacts.notifyDataSetChanged();
-                        auto.getEditableText().clear();
+                    if (saviours.getPosition(contacts.getItem(position)) == -1) {
+                        saviours.add(contacts.getItem(position));
+                        saviours.notifyDataSetChanged();
+                        contactName.getEditableText().clear();
                     }
                 }
             });
@@ -375,16 +318,11 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             mwController.addModuleCallback(new MechanicalSwitch.Callbacks() {
                 @Override
                 public void pressed() {
-                    Toast.makeText(getActivity(), auto.getEditableText().toString(), Toast.LENGTH_LONG).show();
-                    /*
-                    if (saviour != null) {
-                        sendText(saviour.number);
-                    } else if (contacts.getCount() == 1) {
-                        sendText(contacts.getItem(0).name);
+                    if (saviours != null && saviours.getCount() > 0) {
+                        sendText();
                     } else {
                         Toast.makeText(getActivity(), R.string.error_no_contact, Toast.LENGTH_SHORT).show();
                     }
-                    */
                 }
             });
         }
@@ -392,7 +330,7 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
         @Override
         public void onServiceDisconnected(ComponentName name) { }
         
-        private void sendText(String phoneNum) {
+        private void sendText() {
             /*
             Intent it= new Intent(Intent.ACTION_SENDTO, 
                     Uri.parse(String.format("smsto:%s", phoneNum.getEditableText().toString())));
@@ -401,41 +339,16 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
              */
             
             try {
-                SmsManager.getDefault().sendTextMessage(phoneNum, null, 
-                        getActivity().getResources().getString(R.string.text_sos_msg)
-                        , null, null);
+                SmsManager smsMng= SmsManager.getDefault();
+                
+                for(int i= 0; i < saviours.getCount(); i++) {
+                    smsMng.sendTextMessage(saviours.getItem(i).number, null, 
+                            getActivity().getResources().getString(R.string.text_sos_msg)
+                            , null, null);
+                }
             } catch (IllegalArgumentException ex) {
                 Toast.makeText(getActivity(), R.string.error_invalid_number, Toast.LENGTH_SHORT).show();
             }
-        }
-        
-        private void populate(final String key) {
-            getActivity().runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    contacts.clear();
-                    saviour= null;
-
-                    ContentResolver contentResolver = getActivity().getContentResolver();
-                    Cursor cursor = contentResolver.query(CONTENT_URI, new String[] {DISPLAY_NAME, NUMBER}, 
-                            DISPLAY_NAME + " LIKE ?", new String[] {String.format("%s%%", key)}, null);
-                    
-                    if (cursor.getCount() > 0) {
-                        while (cursor.moveToNext()) {
-                            String name = cursor.getString(cursor.getColumnIndex( DISPLAY_NAME ));
-                            
-                            
-                            ContactInfo newInfo= new ContactInfo();
-                            newInfo.name= name;
-                            newInfo.number= cursor.getString(cursor.getColumnIndex(NUMBER));
-                            contacts.add(newInfo);       
-                        }
-                    }
-                    
-                    contacts.notifyDataSetChanged();
-                }
-            });
-            
         }
     }
 }
