@@ -262,10 +262,15 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             setRetainInstance(true);
             setHasOptionsMenu(true);
             
-            Cursor peopleCursor= getActivity().getContentResolver().query(CONTENT_URI,new String[] {DISPLAY_NAME, NUMBER},
-                    null,null,null);
-            contacts= new ContactListAdapter(getActivity(),R.id.contact_info_layout, inflater, peopleCursor);
-            saviours= new ContactListAdapter(getActivity(), R.id.contact_info_layout, inflater);
+            if (saviours == null) {
+                saviours= new ContactListAdapter(getActivity(), R.id.contact_info_layout, inflater);
+            }
+            if (contacts == null) {
+                Cursor peopleCursor= getActivity().getContentResolver().query(CONTENT_URI, 
+                        new String[] {DISPLAY_NAME, NUMBER}, null, null, null);
+                contacts= new ContactListAdapter(getActivity(),R.id.contact_info_layout, inflater, peopleCursor);
+            }
+            
             return inflater.inflate(R.layout.fragment_main, container, false);
         }
 
