@@ -3,6 +3,8 @@
  */
 package com.mbientlab.sostrigger;
 
+import java.util.HashSet;
+
 import com.mbientlab.metawear.api.MetaWearBleService;
 import com.mbientlab.metawear.api.MetaWearController;
 import com.mbientlab.metawear.api.Module;
@@ -32,11 +34,15 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.View.OnLongClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.MultiAutoCompleteTextView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.AdapterView.OnItemClickListener;
@@ -169,6 +175,22 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             super(context, resource);
             this.mInflator= inflator;
         }
+        
+        public ContactListAdapter(Context context, int resource, LayoutInflater inflator, Cursor peopleCursor) {
+            this(context, resource, inflator);
+            
+            if (peopleCursor.getCount() > 0) {
+                while (peopleCursor.moveToNext()) {
+                    String name = peopleCursor.getString(peopleCursor.getColumnIndex( DISPLAY_NAME ));
+                    
+                    
+                    ContactInfo newInfo= new ContactInfo();
+                    newInfo.name= name;
+                    newInfo.number= peopleCursor.getString(peopleCursor.getColumnIndex(NUMBER));
+                    add(newInfo);       
+                }
+            }
+        }
 
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
@@ -205,9 +227,11 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
         private MetaWearBleService mwService= null;
         private MetaWearController mwController= null;
         private EditText phoneNumText= null;
-        private ContactListAdapter contacts= null;
+        private ContactListAdapter contacts= null, selectedContacts= null;
         private ContactInfo saviour= null;
+        private HashSet<ContactInfo> saviours;
         private ListView possibleContacts= null;
+        private AutoCompleteTextView auto= null;
         
         private TextWatcher txtWatcher= new TextWatcher() {
             @Override
@@ -273,17 +297,34 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             setRetainInstance(true);
             setHasOptionsMenu(true);
             
-            contacts= new ContactListAdapter(getActivity(), R.id.contact_info_layout, inflater);
+            //contacts= new ContactListAdapter(getActivity(), R.id.contact_info_layout, inflater);
+            Cursor peopleCursor= getActivity().getContentResolver().query(CONTENT_URI,new String[] {DISPLAY_NAME, NUMBER},
+                    null,null,null);
+            contacts= new ContactListAdapter(getActivity(),R.id.contact_info_layout, inflater, peopleCursor);
+            selectedContacts= new ContactListAdapter(getActivity(), R.id.contact_info_layout, inflater);
             return inflater.inflate(R.layout.fragment_main, container, false);
         }
 
         @Override
         public void onViewCreated(View view, Bundle savedInstanceState) {
+            /*
             phoneNumText= (EditText) view.findViewById(R.id.recipient);
             phoneNumText.addTextChangedListener(txtWatcher);
-            
+            */
             possibleContacts= (ListView) view.findViewById(R.id.phone_contacts); 
-            possibleContacts.setAdapter(contacts);
+            possibleContacts.setAdapter(selectedContacts);
+            possibleContacts.setOnItemLongClickListener(new OnItemLongClickListener() {
+
+                @Override
+                public boolean onItemLongClick(AdapterView<?> parent,
+                        View view, int position, long id) {
+                    selectedContacts.remove(selectedContacts.getItem(position));
+                    selectedContacts.notifyDataSetChanged();
+                    return true;
+                }
+                
+            });
+            /*
             possibleContacts.setOnItemClickListener(new OnItemClickListener() {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view,
@@ -294,6 +335,23 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
                     phoneNumText.removeTextChangedListener(txtWatcher);
                     phoneNumText.setText(saviour.name);
                     phoneNumText.addTextChangedListener(txtWatcher);
+                }
+            });
+            */
+            
+            auto=(AutoCompleteTextView) 
+                    view.findViewById(R.id.AutoCompleteTextView1);
+            auto.setThreshold(1);
+            auto.setAdapter(contacts);
+            auto.setOnItemClickListener(new OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view,
+                        int position, long id) {
+                    if (selectedContacts.getPosition(contacts.getItem(position)) == -1) {
+                        selectedContacts.add(contacts.getItem(position));
+                        selectedContacts.notifyDataSetChanged();
+                        auto.getEditableText().clear();
+                    }
                 }
             });
         }
@@ -317,6 +375,8 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             mwController.addModuleCallback(new MechanicalSwitch.Callbacks() {
                 @Override
                 public void pressed() {
+                    Toast.makeText(getActivity(), auto.getEditableText().toString(), Toast.LENGTH_LONG).show();
+                    /*
                     if (saviour != null) {
                         sendText(saviour.number);
                     } else if (contacts.getCount() == 1) {
@@ -324,6 +384,7 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
                     } else {
                         Toast.makeText(getActivity(), R.string.error_no_contact, Toast.LENGTH_SHORT).show();
                     }
+                    */
                 }
             });
         }
