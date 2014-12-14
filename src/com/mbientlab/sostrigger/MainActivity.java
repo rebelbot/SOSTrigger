@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import static android.provider.ContactsContract.CommonDataKinds.Phone.*;
 import android.telephony.SmsManager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -342,17 +343,22 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             it.putExtra(Intent.EXTRA_TEXT, "Halp! SOS!"); 
             startActivity(it);
              */
+            SmsManager smsMng= SmsManager.getDefault();
+            int errors= 0;
             
-            try {
-                SmsManager smsMng= SmsManager.getDefault();
-                
-                for(int i= 0; i < saviours.getCount(); i++) {
+            for(int i= 0; i < saviours.getCount(); i++) {
+                try {
                     smsMng.sendTextMessage(saviours.getItem(i).number, null, 
                             getActivity().getResources().getString(R.string.text_sos_msg)
                             , null, null);
+                } catch (IllegalArgumentException ex) {
+                    Log.e("SOSTrigger", String.format("Couldn't send text to '%s', msg= %s", saviours.getItem(i).number, ex.getMessage()));
+                    errors++;
                 }
-            } catch (IllegalArgumentException ex) {
-                Toast.makeText(getActivity(), R.string.error_invalid_number, Toast.LENGTH_SHORT).show();
+            }
+            
+            if (errors != 0) {
+                Toast.makeText(getActivity(), R.string.error_sending_text, Toast.LENGTH_SHORT).show();
             }
         }
     }

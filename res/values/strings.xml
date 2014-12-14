@@ -15,10 +15,12 @@
     <string name="hint_contact_name">Contact Name</string>
     <string name="text_rssi_visual">Visual interpretation of the RSSI value</string>
     <string name="text_sos_msg">SOS!  Need Help!</string>
-    <string name="text_howto">Enter a name and select a contact from the list of matching names.  Then, connect to a MetaWear board to send an SOS text message to the recipient by pushing the button on the board</string>
+    <string name="text_howto">Enter the name of a contact you wish to text.  Selected names will appear in the area below the input field and can be 
+        removed by long pressing them.  Once you have your contacts selected, connect a MetaWear board to the app.  You can then send a text message 
+        to your contacts by pressing the onboard button</string>
     
     <string name="error_no_contact">No contact selected</string>
     <string name="error_title">Error</string>
     <string name="error_no_bluetooth">Bluetooth device not deteted</string>
-    <string name="error_invalid_number">Phone number invalid, write all 10 digits as one string</string>
+    <string name="error_sending_text">Couldn't send text to one or more numbers</string>
 </resources>
