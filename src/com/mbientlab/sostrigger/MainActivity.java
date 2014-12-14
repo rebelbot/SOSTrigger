@@ -8,10 +8,12 @@ import com.mbientlab.metawear.api.MetaWearController;
 import com.mbientlab.metawear.api.Module;
 import com.mbientlab.metawear.api.controller.MechanicalSwitch;
 import com.mbientlab.sostrigger.MWScannerFragment.ScannerCallback;
+import com.mbientlab.sostrigger.SettingsFragment.SettingsState;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Fragment;
+import android.app.FragmentManager;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -44,7 +46,7 @@ import android.widget.AdapterView.OnItemClickListener;
  * Main activity that controls the app
  * @author Eric Tsai
  */
-public class MainActivity extends Activity implements ScannerCallback, ServiceConnection {
+public class MainActivity extends Activity implements ScannerCallback, ServiceConnection, SettingsState {
     private final static String FRAGMENT_KEY= "com.mbientlab.sostrigger.MainActivity.FRAGMENT_KEY";
     private final static int REQUEST_ENABLE_BT= 0;
     
@@ -162,6 +164,16 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
     @Override
     public void onServiceDisconnected(ComponentName name) { }
     
+    @Override
+    public void setButtonMessage(int position) {
+        mainFragment.setTextMsgPosition(position);
+    }
+
+    @Override
+    public int getButtonMessage() {
+        return mainFragment.getTextMsgPosition();
+    }
+    
     private static class ContactInfo {
         public String name;
         public String number;
@@ -230,8 +242,17 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
         private ContactListAdapter contacts= null, saviours= null;
         private ListView savioursListView= null;
         private AutoCompleteTextView contactName= null;
+        private int textMsgPosition= 0;
         
         public PlaceholderFragment() {
+        }
+
+        public int getTextMsgPosition() {
+            return textMsgPosition;
+        }
+
+        public void setTextMsgPosition(int position) {
+            textMsgPosition= position;
         }
 
         public void setBtDevice(BluetoothDevice device) {
@@ -321,6 +342,10 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
                     mwService.close(true);
                 }
                 return true;
+            case R.id.action_settings:
+                FragmentManager fm= getActivity().getFragmentManager();
+                new SettingsFragment().show(fm, "settings_fragment");
+                return true;
             }
             return super.onOptionsItemSelected(item);
         }
@@ -353,12 +378,11 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
              */
             SmsManager smsMng= SmsManager.getDefault();
             int errors= 0;
+            String txtMsg= getActivity().getResources().getStringArray(R.array.message_array)[textMsgPosition];
             
             for(int i= 0; i < saviours.getCount(); i++) {
                 try {
-                    smsMng.sendTextMessage(saviours.getItem(i).number, null, 
-                            getActivity().getResources().getString(R.string.text_sos_msg)
-                            , null, null);
+                    smsMng.sendTextMessage(saviours.getItem(i).number, null, txtMsg, null, null);
                 } catch (IllegalArgumentException ex) {
                     Log.e("SOSTrigger", String.format("Couldn't send text to '%s', msg= %s", saviours.getItem(i).number, ex.getMessage()));
                     errors++;

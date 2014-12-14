@@ -4,6 +4,8 @@
     <string name="app_name">SOS Trigger</string>
     <string name="action_connect">Connect</string>
     <string name="action_disconnect">Disconnect</string>
+    <string name="action_help">Help</string>
+    <string name="action_settings">Settings</string>
     <string name="toast_connected">Device Connected</string>
     <string name="toast_disconnected">Device Disconnected</string>
 
@@ -13,9 +15,22 @@
     <string name="label_stop">Stop</string>
     <string name="label_ok">OK</string>
     <string name="label_help">How To</string>
+    <string name="label_settings_button">Button Message</string>
+    
+    <string-array name="message_array">
+        <item>SOS! Need Help!</item>
+        <item>Yo, a little help here?</item>
+        <item>Need some help here!</item>
+        <item>Aye, give me a hand!</item>
+        <item>Help now!</item>
+        <item>I need some doggone help!</item>
+        <item>I require assistance!</item>
+        <item>Need some help here!</item>
+        <item>Some assistance, please!</item>
+    </string-array>
+    
     <string name="hint_contact_name">Contact Name</string>
     <string name="text_rssi_visual">Visual interpretation of the RSSI value</string>
-    <string name="text_sos_msg">SOS!  Need Help!</string>
     <string name="text_help">Enter the name of a contact you wish to text.  Selected names will appear in the area below the input field and can be 
         removed by long pressing them.  Once you have your contacts selected, connect a MetaWear board to the app.  You can then send a text message 
         to your contacts by pressing the onboard button</string>
