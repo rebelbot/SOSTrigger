@@ -6,6 +6,9 @@ package com.mbientlab.sostrigger;
 import com.mbientlab.metawear.api.MetaWearBleService;
 import com.mbientlab.metawear.api.MetaWearController;
 import com.mbientlab.metawear.api.Module;
+import com.mbientlab.metawear.api.controller.Accelerometer;
+import com.mbientlab.metawear.api.controller.Accelerometer.Axis;
+import com.mbientlab.metawear.api.controller.Accelerometer.MovementData;
 import com.mbientlab.metawear.api.controller.MechanicalSwitch;
 import com.mbientlab.sostrigger.MWScannerFragment.ScannerCallback;
 import com.mbientlab.sostrigger.SettingsFragment.SettingsState;
@@ -166,12 +169,19 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
     
     @Override
     public void setButtonMessage(int position) {
-        mainFragment.setTextMsgPosition(position);
+        mainFragment.textMsgPosition= position;
     }
 
     @Override
     public int getButtonMessage() {
-        return mainFragment.getTextMsgPosition();
+        return mainFragment.textMsgPosition;
+    }
+    
+    public void setShakeMessage(int position) {
+        mainFragment.shakeMsgPosition= position;
+    }
+    public int getShakeMessage() {
+        return mainFragment.shakeMsgPosition;
     }
     
     private static class ContactInfo {
@@ -194,12 +204,10 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             
             if (peopleCursor.getCount() > 0) {
                 while (peopleCursor.moveToNext()) {
-                    String name = peopleCursor.getString(peopleCursor.getColumnIndex( DISPLAY_NAME ));
-                    
-                    
                     ContactInfo newInfo= new ContactInfo();
-                    newInfo.name= name;
+                    newInfo.name= peopleCursor.getString(peopleCursor.getColumnIndex( DISPLAY_NAME ));
                     newInfo.number= peopleCursor.getString(peopleCursor.getColumnIndex(NUMBER));
+                    
                     add(newInfo);       
                 }
             }
@@ -237,29 +245,33 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment implements ServiceConnection {
+        private static final byte MAX_SHAKES= 10;
+        
         private MetaWearBleService mwService= null;
         private MetaWearController mwController= null;
         private ContactListAdapter contacts= null, saviours= null;
         private ListView savioursListView= null;
         private AutoCompleteTextView contactName= null;
-        private int textMsgPosition= 0;
+        private byte shakeCounts= 0;
+        private Accelerometer accelCtrllr;
+        private MechanicalSwitch switchCtrllr;
+        
+        public int textMsgPosition= 0, shakeMsgPosition= 0;
         
         public PlaceholderFragment() {
-        }
-
-        public int getTextMsgPosition() {
-            return textMsgPosition;
-        }
-
-        public void setTextMsgPosition(int position) {
-            textMsgPosition= position;
         }
 
         public void setBtDevice(BluetoothDevice device) {
             mwController.addDeviceCallback(new MetaWearController.DeviceCallbacks() {
                 @Override
                 public void connected() {
-                    ((MechanicalSwitch) mwController.getModuleController(Module.MECHANICAL_SWITCH)).enableNotification();
+                    switchCtrllr= ((MechanicalSwitch) mwController.getModuleController(Module.MECHANICAL_SWITCH));
+                    switchCtrllr.enableNotification();
+                    
+                    accelCtrllr= ((Accelerometer) mwController.getModuleController(Module.ACCELEROMETER));
+                    accelCtrllr.enableShakeDetection(Axis.X);
+                    accelCtrllr.startComponents();
+                    
                     Toast.makeText(getActivity(), R.string.toast_connected, Toast.LENGTH_SHORT).show();
                 }
                 
@@ -338,6 +350,8 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
         public boolean onOptionsItemSelected (MenuItem item) {
             switch (item.getItemId()) {
             case R.id.action_disconnect:
+                switchCtrllr.disableNotification();
+                accelCtrllr.stopComponents();
                 if (mwService != null) {
                     mwService.close(true);
                 }
@@ -358,18 +372,33 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
                 @Override
                 public void pressed() {
                     if (saviours != null && saviours.getCount() > 0) {
-                        sendText();
+                        sendText(true);
                     } else {
                         Toast.makeText(getActivity(), R.string.error_no_contact, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).addModuleCallback(new Accelerometer.Callbacks() {
+                @Override
+                public void shakeDetected(MovementData moveData) {
+                    shakeCounts++;
+                    if (shakeCounts == MAX_SHAKES) {
+                        shakeCounts= 0;
+                        if (saviours != null && saviours.getCount() > 0) {
+                            sendText(false);
+                        } else {
+                            Toast.makeText(getActivity(), R.string.error_no_contact, Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
             });
         }
         
         @Override
-        public void onServiceDisconnected(ComponentName name) { }
+        public void onServiceDisconnected(ComponentName name) {
+            mwService= null;
+        }
         
-        private void sendText() {
+        private void sendText(boolean buttonPress) {
             /*
             Intent it= new Intent(Intent.ACTION_SENDTO, 
                     Uri.parse(String.format("smsto:%s", phoneNum.getEditableText().toString())));
@@ -378,7 +407,7 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
              */
             SmsManager smsMng= SmsManager.getDefault();
             int errors= 0;
-            String txtMsg= getActivity().getResources().getStringArray(R.array.message_array)[textMsgPosition];
+            String txtMsg= getActivity().getResources().getStringArray(R.array.message_array)[buttonPress ? textMsgPosition : shakeMsgPosition];
             
             for(int i= 0; i < saviours.getCount(); i++) {
                 try {

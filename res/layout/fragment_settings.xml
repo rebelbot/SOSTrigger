@@ -17,7 +17,20 @@
 
     <Spinner
         android:id="@+id/button_message"
-        android:layout_width="match_parent"
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:spinnerMode="dialog" />
+    
+    <TextView
+        android:id="@+id/shake_setting"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/label_settings_shake"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <Spinner
+        android:id="@+id/shake_message"
+        android:layout_width="300dp"
         android:layout_height="wrap_content"
         android:spinnerMode="dialog" />
 

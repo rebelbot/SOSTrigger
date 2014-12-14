@@ -15,9 +15,11 @@ public class SettingsFragment extends DialogFragment {
     public interface SettingsState {
         public void setButtonMessage(int position);
         public int getButtonMessage();
+        
+        public void setShakeMessage(int position);
+        public int getShakeMessage();
     }
     
-    private Spinner spinnerObj;
     private SettingsState aCallbacks;
     
     @Override
@@ -38,13 +40,13 @@ public class SettingsFragment extends DialogFragment {
     
     @Override
     public void onViewCreated (View view, Bundle savedInstanceState) {
-        getDialog().setTitle(getActivity().getResources().getResourceName(R.id.action_settings));
+        getDialog().setTitle(getActivity().getResources().getString(R.string.action_settings));
         
         final ArrayAdapter<CharSequence> messagesAdapter= ArrayAdapter.createFromResource(getActivity(), 
                 R.array.message_array, android.R.layout.simple_spinner_item);
         messagesAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         
-        spinnerObj= (Spinner) view.findViewById(R.id.button_message);
+        Spinner spinnerObj= (Spinner) view.findViewById(R.id.button_message);
         spinnerObj.setAdapter(messagesAdapter);
         spinnerObj.setSelection(aCallbacks.getButtonMessage());
         spinnerObj.setOnItemSelectedListener(new OnItemSelectedListener() {
@@ -52,6 +54,20 @@ public class SettingsFragment extends DialogFragment {
             public void onItemSelected(AdapterView<?> parent, View view,
                     int position, long id) {
                 aCallbacks.setButtonMessage(position);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) { }
+        });
+        
+        spinnerObj= (Spinner) view.findViewById(R.id.shake_message);
+        spinnerObj.setAdapter(messagesAdapter);
+        spinnerObj.setSelection(aCallbacks.getShakeMessage());
+        spinnerObj.setOnItemSelectedListener(new OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view,
+                    int position, long id) {
+                aCallbacks.setShakeMessage(position);
             }
 
             @Override
