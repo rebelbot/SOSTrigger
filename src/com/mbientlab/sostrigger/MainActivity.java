@@ -3,6 +3,11 @@
  */
 package com.mbientlab.sostrigger;
 
+import java.util.Timer;
+import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+
 import com.mbientlab.metawear.api.MetaWearBleService;
 import com.mbientlab.metawear.api.MetaWearController;
 import com.mbientlab.metawear.api.Module;
@@ -246,15 +251,20 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
      */
     public static class PlaceholderFragment extends Fragment implements ServiceConnection {
         private static final byte MAX_SHAKES= 10;
+        private static final long RESET_DELAY= 3000;
         
         private MetaWearBleService mwService= null;
         private MetaWearController mwController= null;
         private ContactListAdapter contacts= null, saviours= null;
         private ListView savioursListView= null;
         private AutoCompleteTextView contactName= null;
-        private byte shakeCounts= 0;
+        private AtomicInteger shakeCounts;
+        private AtomicBoolean setTimerTask;
+        private final Timer timer= new Timer();
         private Accelerometer accelCtrllr;
         private MechanicalSwitch switchCtrllr;
+        
+        private TimerTask resetTask;
         
         public int textMsgPosition= 0, shakeMsgPosition= 0;
         
@@ -262,6 +272,9 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
         }
 
         public void setBtDevice(BluetoothDevice device) {
+            shakeCounts= new AtomicInteger(0);
+            setTimerTask= new AtomicBoolean(false);
+            
             mwController.addDeviceCallback(new MetaWearController.DeviceCallbacks() {
                 @Override
                 public void connected() {
@@ -380,9 +393,22 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             }).addModuleCallback(new Accelerometer.Callbacks() {
                 @Override
                 public void shakeDetected(MovementData moveData) {
-                    shakeCounts++;
-                    if (shakeCounts == MAX_SHAKES) {
-                        shakeCounts= 0;
+                    shakeCounts.getAndIncrement();
+                    if (!setTimerTask.get()) {
+                        resetTask= new TimerTask() {
+                            @Override
+                            public void run() {
+                                shakeCounts.set(0);
+                                setTimerTask.getAndSet(false);
+                            }
+                        };
+                        timer.schedule(resetTask, RESET_DELAY);
+                        setTimerTask.getAndSet(true);
+                    }
+                    if (shakeCounts.get() == MAX_SHAKES) {
+                        resetTask.cancel();
+                        setTimerTask.getAndSet(false);
+                        shakeCounts.getAndSet(0);
                         if (saviours != null && saviours.getCount() > 0) {
                             sendText(false);
                         } else {
