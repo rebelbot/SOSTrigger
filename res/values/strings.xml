@@ -32,8 +32,10 @@
     
     <string name="hint_contact_name">Contact Name</string>
     <string name="text_rssi_visual">Visual interpretation of the RSSI value</string>
-    <string name="text_help">1) Enter the name of a contact you wish to text.  Selected names will appear in the area below the input field and can be 
-        removed by long pressing them.\n2) Connect a MetaWear board to the app\n3) Send a text message to your contacts by either pressing the onboard button or shaking the board</string>
+    <string name="text_help">1) Enter a contact name and select contact from the list of matches.  Contacts can be removed 
+        by holding the names in the selected contacts list\n2) Configure what messages you want to send in the \"Settings\" 
+        menu\n3) Connect a MetaWear board to the app\n4) Send a text message to your contacts by either pressing the 
+        onboard button or shaking the board</string>
     
     <string name="error_no_contact">No contact selected</string>
     <string name="error_title">Error</string>
