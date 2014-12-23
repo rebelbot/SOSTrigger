@@ -34,7 +34,8 @@ public class MWScannerFragment extends DialogFragment {
         public void btDeviceSelected(BluetoothDevice device);
     }
     
-    private final static int RSSI_BAR_SCALE= 100 / 5;
+    private final static int RSSI_BAR_LEVELS= 5;
+    private final static int RSSI_BAR_SCALE= 100 / RSSI_BAR_LEVELS;
     private final static long SCAN_PERIOD= 10000;
     
     private BluetoothAdapter mBluetoothAdapter= null;
@@ -106,7 +107,7 @@ public class MWScannerFragment extends DialogFragment {
                 viewHolder.deviceName.setText("Unknown Device");
             viewHolder.deviceAddress.setText(info.device.getAddress());
             viewHolder.deviceRSSI.setText(String.format(Locale.US, "%d dBm", info.rssi));
-            viewHolder.rssiChart.setImageLevel((127 + info.rssi + 10) / RSSI_BAR_SCALE);
+            viewHolder.rssiChart.setImageLevel(Math.min(RSSI_BAR_LEVELS - 1, (127 + info.rssi + 5) / RSSI_BAR_SCALE));
             return convertView;
         }
         
