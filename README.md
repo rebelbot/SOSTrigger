@@ -18,10 +18,14 @@ workspace.
 section in the project properties page.
 
 #Usage
-To use the app, enter the name of the contact you wish to text.  While entering the name, a dropdown list of possible matches 
-will appear for convenience.  After selecting your contact, you can search for your MetaWear with the "Connect" menu item.  A 
-popup window of nearby devices will appear during the search.  When you have selected your board, you can press the button to 
-send SOS texts to your contact.  
+1. Enter a contact name and select contact from the list of matches.  Contacts can be removed by holding the names in the 
+selected contacts list
+2. Configure what messages you want to send in the "Settings" menu
+3. Connect a MetaWear board to the app
+4. Send a text message to your contacts by either pressing the onboard button or shaking the board
+
+The app will send texts even if it is in the background.  To stop texts from being sent, either disconnect the MetaWear board or 
+kill the app.
 
 #Questions or Comments
 If you have any questions or comments about the project, leave us a post on our [community page](http://community.mbientlab.com/)
