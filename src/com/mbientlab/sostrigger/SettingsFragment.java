@@ -1,3 +1,6 @@
+/*
+ * Copyright 2014 MbientLab Inc. All rights reserved.
+ */
 package com.mbientlab.sostrigger;
 
 import android.app.Activity;
