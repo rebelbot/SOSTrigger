@@ -3,6 +3,7 @@
  */
 package com.mbientlab.sostrigger;
 
+import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -285,6 +286,7 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             setTimerTask= new AtomicBoolean(false);
 
             mwController= mwService.getMetaWearController(device);
+            mwController.setRetainState(false);
             mwController.addDeviceCallback(new MetaWearController.DeviceCallbacks() {
                 @Override
                 public void connected() {
@@ -438,12 +440,13 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             startActivity(it);
              */
             SmsManager smsMng= SmsManager.getDefault();
-            int errors= 0;
+            byte errors= 0, successful= 0;
             String txtMsg= getActivity().getResources().getStringArray(R.array.message_array)[buttonPress ? textMsgPosition : shakeMsgPosition];
             
             for(int i= 0; i < saviours.getCount(); i++) {
                 try {
                     smsMng.sendTextMessage(saviours.getItem(i).number, null, txtMsg, null, null);
+                    successful++;
                 } catch (IllegalArgumentException ex) {
                     Log.e("SOSTrigger", String.format("Couldn't send text to '%s', msg= %s", saviours.getItem(i).number, ex.getMessage()));
                     errors++;
@@ -452,6 +455,9 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             
             if (errors != 0) {
                 Toast.makeText(getActivity(), R.string.error_sending_text, Toast.LENGTH_SHORT).show();
+            } else {
+                final String successfulText= getActivity().getResources().getString(R.string.text_successful);
+                Toast.makeText(getActivity(), String.format(Locale.US, successfulText, successful), Toast.LENGTH_SHORT).show();
             }
         }
     }
