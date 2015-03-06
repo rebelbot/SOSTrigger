@@ -147,6 +147,9 @@ public class MWScannerFragment extends DialogFragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view,
                     int position, long id) {
+                if (isScanning) {
+                    stopBleScan();
+                }
                 callback.btDeviceSelected(mLeDeviceListAdapter.getItem(position).device);
                 dismiss();
             }
