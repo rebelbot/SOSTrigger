@@ -19,6 +19,6 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:support-v4:19.1.0'
-    compile files('libs/metawearapi-1.2.jar')
+    compile 'com.android.support:support-v4:21.0.3'
+    compile 'com.mbientlab:metawear:1.5.3'
 }
