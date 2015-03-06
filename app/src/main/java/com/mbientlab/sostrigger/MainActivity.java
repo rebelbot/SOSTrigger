@@ -34,6 +34,8 @@ import android.database.Cursor;
 import android.os.Bundle;
 import android.os.IBinder;
 import static android.provider.ContactsContract.CommonDataKinds.Phone.*;
+
+import android.support.v4.content.LocalBroadcastManager;
 import android.telephony.SmsManager;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -60,6 +62,7 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
     
     private PlaceholderFragment mainFragment= null;
     private MetaWearBleService mwService= null;
+    private LocalBroadcastManager broadcastManager= null;
     
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,8 +102,8 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
     public void onDestroy() {
         super.onDestroy();
         
-        if (mwService != null) {
-            mwService.unregisterReceiver(MetaWearBleService.getMetaWearBroadcastReceiver());
+        if (broadcastManager != null) {
+            broadcastManager.unregisterReceiver(MetaWearBleService.getMetaWearBroadcastReceiver());
         }
         getApplicationContext().unbindService(this);
     }
@@ -165,8 +168,11 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder service) {
         mwService= ((MetaWearBleService.LocalBinder) service).getService();
-        mwService.registerReceiver(MetaWearBleService.getMetaWearBroadcastReceiver(), 
+
+        broadcastManager= LocalBroadcastManager.getInstance(mwService);
+        broadcastManager.registerReceiver(MetaWearBleService.getMetaWearBroadcastReceiver(),
                 MetaWearBleService.getMetaWearIntentFilter());
+        mwService.useLocalBroadcastManager(broadcastManager);
     }
     
     @Override
@@ -181,10 +187,13 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
     public int getButtonMessage() {
         return mainFragment.textMsgPosition;
     }
-    
+
+    @Override
     public void setShakeMessage(int position) {
         mainFragment.shakeMsgPosition= position;
     }
+
+    @Override
     public int getShakeMessage() {
         return mainFragment.shakeMsgPosition;
     }
@@ -274,7 +283,8 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
         public void setBtDevice(BluetoothDevice device) {
             shakeCounts= new AtomicInteger(0);
             setTimerTask= new AtomicBoolean(false);
-            
+
+            mwController= mwService.getMetaWearController(device);
             mwController.addDeviceCallback(new MetaWearController.DeviceCallbacks() {
                 @Override
                 public void connected() {
@@ -292,8 +302,43 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
                 public void disconnected() {
                     Toast.makeText(getActivity(), R.string.toast_disconnected, Toast.LENGTH_SHORT).show();
                 }
+            }).addModuleCallback(new MechanicalSwitch.Callbacks() {
+                @Override
+                public void pressed() {
+                    if (saviours != null && saviours.getCount() > 0) {
+                        sendText(true);
+                    } else {
+                        Toast.makeText(getActivity(), R.string.error_no_contact, Toast.LENGTH_SHORT).show();
+                    }
+                }
+            }).addModuleCallback(new Accelerometer.Callbacks() {
+                @Override
+                public void shakeDetected(MovementData moveData) {
+                    shakeCounts.getAndIncrement();
+                    if (!setTimerTask.get()) {
+                        resetTask= new TimerTask() {
+                            @Override
+                            public void run() {
+                                shakeCounts.set(0);
+                                setTimerTask.getAndSet(false);
+                            }
+                        };
+                        timer.schedule(resetTask, RESET_DELAY);
+                        setTimerTask.getAndSet(true);
+                    }
+                    if (shakeCounts.get() == MAX_SHAKES) {
+                        resetTask.cancel();
+                        setTimerTask.getAndSet(false);
+                        shakeCounts.getAndSet(0);
+                        if (saviours != null && saviours.getCount() > 0) {
+                            sendText(false);
+                        } else {
+                            Toast.makeText(getActivity(), R.string.error_no_contact, Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                }
             });
-            mwService.connect(device);
+            mwController.connect();
         }
         
         @Override
@@ -365,9 +410,7 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
             case R.id.action_disconnect:
                 switchCtrllr.disableNotification();
                 accelCtrllr.stopComponents();
-                if (mwService != null) {
-                    mwService.close(true);
-                }
+                mwController.waitToClose(true);
                 return true;
             case R.id.action_settings:
                 FragmentManager fm= getActivity().getFragmentManager();
@@ -380,43 +423,6 @@ public class MainActivity extends Activity implements ScannerCallback, ServiceCo
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
             mwService= ((MetaWearBleService.LocalBinder) service).getService();
-            mwController= mwService.getMetaWearController();
-            mwController.addModuleCallback(new MechanicalSwitch.Callbacks() {
-                @Override
-                public void pressed() {
-                    if (saviours != null && saviours.getCount() > 0) {
-                        sendText(true);
-                    } else {
-                        Toast.makeText(getActivity(), R.string.error_no_contact, Toast.LENGTH_SHORT).show();
-                    }
-                }
-            }).addModuleCallback(new Accelerometer.Callbacks() {
-                @Override
-                public void shakeDetected(MovementData moveData) {
-                    shakeCounts.getAndIncrement();
-                    if (!setTimerTask.get()) {
-                        resetTask= new TimerTask() {
-                            @Override
-                            public void run() {
-                                shakeCounts.set(0);
-                                setTimerTask.getAndSet(false);
-                            }
-                        };
-                        timer.schedule(resetTask, RESET_DELAY);
-                        setTimerTask.getAndSet(true);
-                    }
-                    if (shakeCounts.get() == MAX_SHAKES) {
-                        resetTask.cancel();
-                        setTimerTask.getAndSet(false);
-                        shakeCounts.getAndSet(0);
-                        if (saviours != null && saviours.getCount() > 0) {
-                            sendText(false);
-                        } else {
-                            Toast.makeText(getActivity(), R.string.error_no_contact, Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-            });
         }
         
         @Override
